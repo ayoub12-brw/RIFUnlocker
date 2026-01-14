@@ -48,7 +48,11 @@
                 <th style="padding:10px 8px;border:1.5px solid #e3eafc;">إجراءات</th>
             </tr>
             {% for req in requests %}
-            <tr style="background-color: {{ '#fafdff' if loop.index0 % 2 == 0 else '#fff' }};">
+            {% if loop.index0 % 2 == 0 %}
+            <tr style="background-color: #fafdff;">
+            {% else %}
+            <tr style="background-color: #fff;">
+            {% endif %}
                 <td style="padding:8px 6px;border:1.5px solid #e3eafc;">{{ req.id }}</td>
                 <td style="padding:8px 6px;border:1.5px solid #e3eafc;">{{ req.username }}</td>
                 <td style="padding:8px 6px;border:1.5px solid #e3eafc;">{{ req.method }}</td>

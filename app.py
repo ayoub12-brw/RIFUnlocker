@@ -652,6 +652,7 @@ def create_user(username, password, email):
     import secrets
     api_key = secrets.token_hex(24)
     password_hash = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    role = 'user'  # تعيين دور افتراضي
     conn = get_db_connection()
     try:
         conn.execute('INSERT INTO users (username, password_hash, email, api_key, role) VALUES (?, ?, ?, ?, ?)',
