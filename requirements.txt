@@ -1,1 +1,4 @@
 Flask
+bcrypt
+werkzeug
+stripe
