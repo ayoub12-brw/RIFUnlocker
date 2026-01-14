@@ -79,7 +79,54 @@
         {% else %}
             <div style="color:#888;margin-top:30px;">لا يوجد سجل كريدي حالياً.</div>
         {% endif %}
-        <a href="/admin/orders" class="back-link">العودة للطلبات</a>
+        <div class="admin-sidebar">
+            <a href="/admin/orders" class="shortcut-btn"><i class="fa fa-list"></i> الطلبات</a>
+            <a href="/admin/credits" class="shortcut-btn"><i class="fa fa-coins"></i> رصيد المستخدمين</a>
+            <a href="/admin/credit-logs" class="shortcut-btn"><i class="fa fa-history"></i> سجل الكريدي</a>
+            <a href="/admin/users" class="shortcut-btn"><i class="fa fa-users"></i> المستخدمين</a>
+            <a href="/admin/services" class="shortcut-btn"><i class="fa fa-cogs"></i> الخدمات والأسعار</a>
+            <a href="/admin/recharge-requests" class="shortcut-btn"><i class="fa fa-bolt"></i> طلبات شحن الرصيد</a>
+        </div>
+        <style>
+            .admin-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                width: 210px;
+                background: #fafdff;
+                box-shadow: 2px 0 12px #e3eafc;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 32px 0 0 0;
+                z-index: 1001;
+            }
+            .shortcut-btn {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                padding: 12px 18px;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1.07em;
+                text-decoration: none;
+                margin: 0 12px;
+                color: #007bff;
+                background: #eaf4ff;
+                box-shadow: 0 2px 8px #e3eafc;
+                border: 1px solid #e3eafc;
+                transition: background 0.2s, color 0.2s;
+            }
+            .shortcut-btn:hover {
+                background: #007bff;
+                color: #fff !important;
+            }
+            @media (max-width: 900px) {
+                .admin-sidebar {position:static;width:100%;height:auto;flex-direction:row;gap:6px;padding:12px 0 0 0;box-shadow:none;justify-content:center;}
+                .shortcut-btn {margin:0;padding:8px 10px;font-size:0.97em;}
+            }
+        </style>
     </div>
 </body>
 </html>

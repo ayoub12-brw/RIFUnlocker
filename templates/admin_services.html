@@ -27,17 +27,25 @@
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="nav-logo">RIF Unlocker</a>
-            <ul class="nav-links">
-                <li><a href="/">الرئيسية</a></li>
-                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
-                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+    <nav class="navbar" style="background: linear-gradient(90deg, #007bff 60%, #219150 100%); border-bottom: 2px solid #e3eafc; padding: 10px 0; position: relative; z-index: 1000; box-shadow: 0 2px 8px #e3eafc; direction: rtl;">
+        <div class="nav-container" style="max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center;">
+            <a href="/" class="nav-logo" style="font-size: 1.7em; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: 1px; display:flex;align-items:center;gap:7px;"><i class="fa-solid fa-unlock-keyhole"></i> RIF Unlocker</a>
+            <ul class="nav-links" style="list-style: none; padding: 0; margin: 0; display: flex; gap: 15px; position:relative;">
+                <li><a href="/" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;"><i class="fa-solid fa-house"></i> الرئيسية</a></li>
+                <li><a href="/services?category=Server%20Service&lang={{lang}}" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;"><i class="fa-solid fa-server"></i> Server Service</a></li>
+                <li><a href="/services?category=IMEI%20Service&lang={{lang}}" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;"><i class="fa-solid fa-mobile-screen-button"></i> IMEI Service</a></li>
+                <li><a href="/services?lang={{lang}}" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;"><i class="fa-solid fa-list"></i> كل الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;"><i class="fa-solid fa-list-check"></i> طلباتي</a></li>
                 {% if session.get('user_id') %}
-                <li><a href="/logout">تسجيل الخروج</a></li>
+                <li style="position:absolute;left:18px;top:10px;background:#eaf4ff;color:#219150;border-radius:6px;padding:5px 12px;font-size:0.95em;font-weight:700;display:flex;align-items:center;gap:7px;">
+                    <i class="fa-solid fa-coins"></i>
+                    {% set credits = g.user['credits'] if g.user and 'credits' in g.user else 0 %}
+                    {{ credits }} نقطة
+                    <a href="/panel" style="color:#888;margin-left:2px;font-size:1em;" title="إعدادات الحساب"><i class="fa-solid fa-gear"></i></a>
+                </li>
+                <li><a href="/logout" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</a></li>
                 {% else %}
-                <li><a href="/login">تسجيل الدخول</a></li>
+                <li><a href="/login" style="color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;"><i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول</a></li>
                 {% endif %}
             </ul>
         </div>
@@ -124,7 +132,54 @@
             </tr>
             {% endfor %}
         </table>
-        <a href="/admin/orders" class="back-link">العودة للطلبات</a>
+        <div class="admin-sidebar">
+            <a href="/admin/orders" class="shortcut-btn"><i class="fa fa-list"></i> الطلبات</a>
+            <a href="/admin/credits" class="shortcut-btn"><i class="fa fa-coins"></i> رصيد المستخدمين</a>
+            <a href="/admin/credit-logs" class="shortcut-btn"><i class="fa fa-history"></i> سجل الكريدي</a>
+            <a href="/admin/users" class="shortcut-btn"><i class="fa fa-users"></i> المستخدمين</a>
+            <a href="/admin/services" class="shortcut-btn"><i class="fa fa-cogs"></i> الخدمات والأسعار</a>
+            <a href="/admin/recharge-requests" class="shortcut-btn"><i class="fa fa-bolt"></i> طلبات شحن الرصيد</a>
+        </div>
+        <style>
+            .admin-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                width: 210px;
+                background: #fafdff;
+                box-shadow: 2px 0 12px #e3eafc;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 32px 0 0 0;
+                z-index: 1001;
+            }
+            .shortcut-btn {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                padding: 12px 18px;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1.07em;
+                text-decoration: none;
+                margin: 0 12px;
+                color: #007bff;
+                background: #eaf4ff;
+                box-shadow: 0 2px 8px #e3eafc;
+                border: 1px solid #e3eafc;
+                transition: background 0.2s, color 0.2s;
+            }
+            .shortcut-btn:hover {
+                background: #007bff;
+                color: #fff !important;
+            }
+            @media (max-width: 900px) {
+                .admin-sidebar {position:static;width:100%;height:auto;flex-direction:row;gap:6px;padding:12px 0 0 0;box-shadow:none;justify-content:center;}
+                .shortcut-btn {margin:0;padding:8px 10px;font-size:0.97em;}
+            }
+        </style>
     </div>
 </body>
 </html>

@@ -47,7 +47,35 @@
                 </select>
             </form>
         </div>
-        <div class="orders-title">{{ _t('admin_orders') if _t('admin_orders') != 'admin_orders' else 'جميع طلبات الخدمات' }}</div>
+
+        <!-- إحصائيات الطلبات -->
+        <div style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:18px 32px;align-items:center;">
+            <div><b>إجمالي الطلبات:</b> {{ total_orders }}</div>
+            <div style="color:#888;">بانتظار التنفيذ: <span style="color:#b00;font-weight:700;">{{ status_counts['Pending'] }}</span></div>
+            <div style="color:#888;">قيد التنفيذ: <span style="color:#007bff;font-weight:700;">{{ status_counts['Processing'] }}</span></div>
+            <div style="color:#888;">تم: <span style="color:#219150;font-weight:700;">{{ status_counts['Done'] }}</span></div>
+            <div style="color:#888;">فشل التنفيذ: <span style="color:#888;font-weight:700;">{{ status_counts['Failed'] }}</span></div>
+        </div>
+
+        <!-- فلترة وبحث -->
+        <form method="get" style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <select name="status" style="padding:7px 12px;border-radius:6px;border:1px solid #e3eafc;">
+                <option value="">كل الحالات</option>
+                <option value="Pending" {% if request.args.get('status')=='Pending' %}selected{% endif %}>بانتظار التنفيذ</option>
+                <option value="Processing" {% if request.args.get('status')=='Processing' %}selected{% endif %}>قيد التنفيذ</option>
+                <option value="Done" {% if request.args.get('status')=='Done' %}selected{% endif %}>تم</option>
+                <option value="Failed" {% if request.args.get('status')=='Failed' %}selected{% endif %}>فشل التنفيذ</option>
+            </select>
+            <select name="service" style="padding:7px 12px;border-radius:6px;border:1px solid #e3eafc;">
+                <option value="">كل الخدمات</option>
+                {% for s in services_list %}
+                    <option value="{{s}}" {% if request.args.get('service')==s %}selected{% endif %}>{{s}}</option>
+                {% endfor %}
+            </select>
+            <input type="text" name="search" placeholder="بحث بالاسم أو الهاتف أو IMEI..." value="{{ request.args.get('search', '') }}" style="padding:7px 12px;border-radius:6px;border:1px solid #e3eafc;min-width:180px;">
+            <button type="submit" class="service-btn" style="padding:7px 18px;">بحث</button>
+        </form>
+
         {% if orders %}
         <table class="orders-table">
             <tr>
@@ -68,7 +96,9 @@
                 <td>{{ order.phone }}</td>
                 <td>{{ order.imei }}</td>
                 <td>{{ order.details }}</td>
-                <td>{{ order.status }}</td>
+                <td>
+                    {% if order.status=='Pending' %}<span style="color:#b00;font-weight:700;">بانتظار التنفيذ</span>{% elif order.status=='Processing' %}<span style="color:#007bff;font-weight:700;">قيد التنفيذ</span>{% elif order.status=='Done' %}<span style="color:#219150;font-weight:700;">تم</span>{% elif order.status=='Failed' %}<span style="color:#888;font-weight:700;">فشل التنفيذ</span>{% else %}{{ order.status }}{% endif %}
+                </td>
                 <td>
                     <form method="post" action="/admin/orders" style="margin:0;">
                         <input type="hidden" name="order_id" value="{{ order.id }}">
@@ -87,12 +117,54 @@
         {% else %}
             <div style="color:#888;margin-top:30px;">لا توجد طلبات حالياً.</div>
         {% endif %}
-        <a href="/" class="back-link">العودة للرئيسية</a>
-        <a href="/admin/credits" class="back-link" style="margin-right:18px;">إدارة رصيد المستخدمين</a>
-        <a href="/admin/credit-logs" class="back-link" style="margin-right:18px;">سجل الكريدي (الإدارة)</a>
-        <a href="/admin/users" class="back-link" style="margin-right:18px;">إدارة المستخدمين</a>
-        <a href="/admin/services" class="back-link" style="margin-right:18px;">إدارة الخدمات والأسعار</a>
-        <a href="/admin/recharge-requests" class="back-link" style="margin-right:18px;">طلبات شحن الرصيد</a>
+        <div class="admin-sidebar">
+            <a href="/admin/orders" class="shortcut-btn"><i class="fa fa-list"></i> الطلبات</a>
+            <a href="/admin/credits" class="shortcut-btn"><i class="fa fa-coins"></i> رصيد المستخدمين</a>
+            <a href="/admin/credit-logs" class="shortcut-btn"><i class="fa fa-history"></i> سجل الكريدي</a>
+            <a href="/admin/users" class="shortcut-btn"><i class="fa fa-users"></i> المستخدمين</a>
+            <a href="/admin/services" class="shortcut-btn"><i class="fa fa-cogs"></i> الخدمات والأسعار</a>
+            <a href="/admin/recharge-requests" class="shortcut-btn"><i class="fa fa-bolt"></i> طلبات شحن الرصيد</a>
+        </div>
+        <style>
+            .admin-sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                height: 100vh;
+                width: 210px;
+                background: #fafdff;
+                box-shadow: 2px 0 12px #e3eafc;
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                padding: 32px 0 0 0;
+                z-index: 1001;
+            }
+            .shortcut-btn {
+                display: flex;
+                align-items: center;
+                gap: 7px;
+                padding: 12px 18px;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 1.07em;
+                text-decoration: none;
+                margin: 0 12px;
+                color: #007bff;
+                background: #eaf4ff;
+                box-shadow: 0 2px 8px #e3eafc;
+                border: 1px solid #e3eafc;
+                transition: background 0.2s, color 0.2s;
+            }
+            .shortcut-btn:hover {
+                background: #007bff;
+                color: #fff !important;
+            }
+            @media (max-width: 900px) {
+                .admin-sidebar {position:static;width:100%;height:auto;flex-direction:row;gap:6px;padding:12px 0 0 0;box-shadow:none;justify-content:center;}
+                .shortcut-btn {margin:0;padding:8px 10px;font-size:0.97em;}
+            }
+        </style>
     </div>
 </body>
 </html>

@@ -125,6 +125,7 @@ def get_user_by_username(username):
     return user
 
 # --- لوحة إدارة الطلبات ---
+
 @app.route('/admin/orders', methods=['GET', 'POST'])
 def admin_orders():
     if not session.get('admin_logged_in'):
@@ -136,8 +137,26 @@ def admin_orders():
         if order_id and new_status:
             conn.execute('UPDATE orders SET status = ? WHERE id = ?', (new_status, order_id))
             conn.commit()
-    orders_db = conn.execute('SELECT * FROM orders ORDER BY created_at DESC').fetchall()
+    # فلترة وبحث
+    status_filter = request.args.get('status', '')
+    service_filter = request.args.get('service', '')
+    search = request.args.get('search', '').strip()
+    query = 'SELECT * FROM orders WHERE 1=1'
+    params = []
+    if status_filter:
+        query += ' AND status = ?'
+        params.append(status_filter)
+    if service_filter:
+        query += ' AND service = ?'
+        params.append(service_filter)
+    if search:
+        query += ' AND (username LIKE ? OR phone LIKE ? OR imei LIKE ? OR details LIKE ?)' 
+        like_search = f'%{search}%'
+        params += [like_search, like_search, like_search, like_search]
+    query += ' ORDER BY created_at DESC'
+    orders_db = conn.execute(query, tuple(params)).fetchall()
     orders = []
+    status_counts = {'Pending': 0, 'Processing': 0, 'Done': 0, 'Failed': 0}
     for row in orders_db:
         orders.append({
             'id': row['id'],
@@ -149,8 +168,12 @@ def admin_orders():
             'details': row['details'],
             'status': row['status'],
         })
+        if row['status'] in status_counts:
+            status_counts[row['status']] += 1
+    # جلب جميع الخدمات لخيارات الفلترة
+    services_list = [r['service'] for r in conn.execute('SELECT DISTINCT service FROM orders').fetchall()]
     conn.close()
-    return render_template('admin_orders.html', orders=orders)
+    return render_template('admin_orders.html', orders=orders, status_counts=status_counts, total_orders=len(orders), services_list=services_list)
 # ...existing code...
 
 def get_locale():

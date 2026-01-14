@@ -120,7 +120,7 @@
                         <div style="margin-bottom:4px;"><span style="color:#007bff;font-weight:600;">السعر:</span> <span style="font-size:0.97em;">${{ service['price'] }}</span></div>
                         <div style="margin-bottom:4px;"><span style="color:#007bff;font-weight:600;">مدة التسليم:</span> <span style="font-size:0.97em;">{{ service['delivery_time'] }}</span></div>
                         <div style="display:flex;gap:7px;margin-top:7px;">
-                            <button type="button" class="service-btn" onclick='openOrderModal("{{ service.id|escapejs }}", "{{ service.name|escapejs }}")'>اطلب</button>
+                            <button type="button" class="service-btn" onclick='openOrderModal({{ service.id|tojson }}, {{ service.name|tojson }})'>اطلب</button>
                             <a href="/service/{{ service['id'] }}?lang={{lang}}" class="service-btn" style="background:#eaf4ff;color:#007bff;border:1px solid #007bff;padding:6px 14px;">تفاصيل</a>
                         </div>
                     </div>
