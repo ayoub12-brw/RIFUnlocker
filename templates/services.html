@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ar">
+</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جميع خدمات الهواتف</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {font-family: 'Cairo', Arial, sans-serif; background: #fafdff; margin:0;}
+        .navbar {background: linear-gradient(90deg, #007bff 60%, #219150 100%); border-bottom: 2px solid #e3eafc; padding: 10px 0; position: relative; z-index: 1000; box-shadow: 0 2px 8px #e3eafc; direction: rtl;}
+        .nav-container {max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center;}
+        .nav-logo {font-size: 1.7em; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: 1px; display:flex;align-items:center;gap:7px;}
+        .nav-links {list-style: none; padding: 0; margin: 0; display: flex; gap: 15px;}
+        .nav-links li {margin: 0;}
+        .nav-links a {color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;}
+        .nav-links a:hover {background: #fff; color: #007bff;}
+        .container {max-width: 900px; margin: 28px auto 0 auto; background: #fff; border-radius: 14px; box-shadow: 0 2px 10px #e3eafc; padding: 18px 10px;}
+        @media (max-width: 700px) {
+            .container {padding: 7px 1vw;}
+            .service-card {width:100%!important;min-width:0!important;max-width:100%!important;}
+        }
+        .services-list {margin-top:18px;}
+        .service-card {
+            background: #fff;
+            border: 1.5px solid #e3eafc;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.10);
+            padding: 14px 12px 12px 12px;
+            margin-bottom: 14px;
+            text-align: right;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .service-title {color:#007bff;font-size:1.08em;font-weight:700;margin-bottom:7px;}
+        .service-desc {color:#222b45;font-size:0.97em;margin-bottom:8px;}
+        .service-btn {
+            background: linear-gradient(90deg, #007bff 60%, #0056b3 100%);
+            color: #fff;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 0.97em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .service-btn:hover {background: linear-gradient(90deg, #0056b3 60%, #007bff 100%);}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo"><i class="fa-solid fa-unlock-keyhole"></i> RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/"><i class="fa-solid fa-house"></i> الرئيسية</a></li>
+                <li><a href="/services?category=Server%20Service&lang={{lang}}"><i class="fa-solid fa-server"></i> Server Service</a></li>
+                <li><a href="/services?category=IMEI%20Service&lang={{lang}}"><i class="fa-solid fa-mobile-screen-button"></i> IMEI Service</a></li>
+                <li><a href="/services?lang={{lang}}"><i class="fa-solid fa-list"></i> كل الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}"><i class="fa-solid fa-list-check"></i> طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li style="position:absolute;left:18px;top:10px;background:#eaf4ff;color:#219150;border-radius:6px;padding:5px 12px;font-size:0.95em;font-weight:700;display:flex;align-items:center;gap:7px;">
+                    <i class="fa-solid fa-coins"></i>
+                    {% set credits = g.user['credits'] if g.user and 'credits' in g.user else 0 %}
+                    {{ credits }} نقطة
+                    <a href="/panel" style="color:#888;margin-left:2px;font-size:1em;" title="إعدادات الحساب"><i class="fa-solid fa-gear"></i></a>
+                </li>
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login"><i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول</a></li>
+                {% endif %}
+                <li style="margin-right:18px;">
+                    <form method="get" style="display:inline;">
+                        <select name="lang" onchange="this.form.submit()" style="padding:5px 12px;border-radius:6px;border:1px solid #e3eafc;">
+                            {% for l in LANGUAGES %}
+                                <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                            {% endfor %}
+                        </select>
+                        {% for key, value in request.args.items() %}
+                            {% if key != 'lang' %}
+                                <input type="hidden" name="{{key}}" value="{{value}}">
+                            {% endif %}
+                        {% endfor %}
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <h1>{{ _t('services') }}</h1>
+        <form method="get" style="margin-bottom:18px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;">
+            <input type="text" name="search" placeholder="ابحث عن خدمة..." value="{{ request.args.get('search', '') }}" style="padding:7px 12px;border-radius:6px;border:1px solid #e3eafc;min-width:180px;">
+            <select name="category" style="padding:7px 12px;border-radius:6px;border:1px solid #e3eafc;">
+                <option value="">كل الفئات</option>
+                {% for cat in categories %}
+                    <option value="{{cat}}" {% if request.args.get('category')==cat %}selected{% endif %}>{{cat}}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="service-btn" style="padding:7px 18px;">بحث</button>
+        </form>
+        <div class="services-list">
+            {% if services %}
+                {% set last_category = None %}
+                {% for service in services %}
+                    {% if service['category'] != last_category %}
+                        {% if not loop.first %}</div>{% endif %}
+                        <h2 style="color:#007bff;margin-bottom:18px;font-size:1.4em;font-weight:700;">{{ service['category'] }}</h2>
+                        <div class="category-services" style="display:flex;flex-wrap:wrap;gap:24px 2.5%;margin-bottom:32px;">
+                    {% set last_category = service['category'] %}
+                    {% endif %}
+                    <div class="service-card" style="width:47%;min-width:200px;max-width:320px;box-sizing:border-box;">
+                        <div style="display:flex;align-items:center;gap:14px;margin-bottom:10px;">
+                            <img src="/static/service_icon.png" alt="خدمة" style="width:48px;height:48px;border-radius:12px;background:#eaf4ff;object-fit:cover;">
+                            <div class="service-title" style="font-size:1.08em;margin-bottom:0;">{{ service['name'] }}</div>
+                        </div>
+                        <div class="service-desc" style="margin-bottom:10px;color:#444;">{{ service['description'] }}</div>
+                        <div style="margin-bottom:4px;"><span style="color:#007bff;font-weight:600;">السعر:</span> <span style="font-size:0.97em;">${{ service['price'] }}</span></div>
+                        <div style="margin-bottom:4px;"><span style="color:#007bff;font-weight:600;">مدة التسليم:</span> <span style="font-size:0.97em;">{{ service['delivery_time'] }}</span></div>
+                        <div style="display:flex;gap:7px;margin-top:7px;">
+                            <button type="button" class="service-btn" onclick="openOrderModal('{{ service['id'] }}', '{{ service['name']|escape }}')">اطلب</button>
+                            <a href="/service/{{ service['id'] }}?lang={{lang}}" class="service-btn" style="background:#eaf4ff;color:#007bff;border:1px solid #007bff;padding:6px 14px;">تفاصيل</a>
+                        </div>
+                    </div>
+                    {% if loop.last %}</div>{% endif %}
+                {% endfor %}
+            {% else %}
+                <div style="color:#b00;font-size:1.1em;margin:30px 0;">لا توجد خدمات مطابقة للبحث أو الفئة المختارة.</div>
+            {% endif %}
+            <a href="/" style="display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;">العودة للرئيسية</a>
+        </div>
+
+        <!-- نافذة الطلب المنبثقة -->
+        <div id="orderModal" style="display:none;position:fixed;z-index:2000;left:0;top:0;width:100vw;height:100vh;background:rgba(0,0,0,0.25);align-items:center;justify-content:center;">
+            <div style="background:#fff;padding:32px 24px 18px 24px;border-radius:18px;max-width:370px;width:95vw;box-shadow:0 4px 24px #007bff33;position:relative;">
+                <button onclick="closeOrderModal()" style="position:absolute;left:12px;top:12px;background:none;border:none;font-size:1.5em;color:#007bff;cursor:pointer;"><i class='fa fa-times'></i></button>
+                <h2 style="color:#007bff;font-size:1.25em;font-weight:700;margin-bottom:18px;">طلب الخدمة</h2>
+                <form id="orderForm" method="post" action="#" autocomplete="off" onsubmit="submitOrderForm(event)">
+                    <input type="hidden" name="service_id" id="modal_service_id">
+                    <div style="margin-bottom:14px;">
+                        <label style="font-weight:600;color:#333;">الخدمة:</label>
+                        <input type="text" id="modal_service_name" name="service_name" readonly style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #e3eafc;background:#f7fafd;margin-top:4px;">
+                    </div>
+                    <div style="margin-bottom:14px;">
+                        <label style="font-weight:600;color:#333;">السيريال / IMEI:</label>
+                        <input type="text" name="serial" required placeholder="أدخل السيريال أو IMEI" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #e3eafc;margin-top:4px;">
+                    </div>
+                    <div style="margin-bottom:18px;">
+                        <label style="font-weight:600;color:#333;">ملاحظات إضافية:</label>
+                        <textarea name="notes" rows="2" style="width:100%;padding:7px 10px;border-radius:6px;border:1px solid #e3eafc;margin-top:4px;"></textarea>
+                    </div>
+                    <button type="submit" class="service-btn" style="width:100%;font-size:1.1em;">تأكيد الطلب</button>
+                </form>
+                <div id="orderSuccessMsg" style="display:none;color:#219150;font-weight:600;font-size:1.1em;margin-top:18px;text-align:center;">تم إرسال الطلب بنجاح!</div>
+            </div>
+        </div>
+
+        <script>
+        function openOrderModal(serviceId, serviceName) {
+            document.getElementById('orderModal').style.display = 'flex';
+            document.getElementById('modal_service_id').value = serviceId;
+            document.getElementById('modal_service_name').value = serviceName;
+            document.getElementById('orderSuccessMsg').style.display = 'none';
+            document.getElementById('orderForm').style.display = '';
+        }
+        function closeOrderModal() {
+            document.getElementById('orderModal').style.display = 'none';
+        }
+        function submitOrderForm(e) {
+            e.preventDefault();
+            var form = document.getElementById('orderForm');
+            var formData = new FormData(form);
+            fetch('/order_modal', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                form.style.display = 'none';
+                var msg = document.getElementById('orderSuccessMsg');
+                if (data.success) {
+                    msg.textContent = data.message;
+                    msg.style.color = '#219150';
+                } else {
+                    msg.textContent = data.error || 'حدث خطأ أثناء إرسال الطلب.';
+                    msg.style.color = '#b00';
+                }
+                msg.style.display = 'block';
+                setTimeout(closeOrderModal, 1800);
+            })
+            .catch(() => {
+                form.style.display = 'none';
+                var msg = document.getElementById('orderSuccessMsg');
+                msg.textContent = 'تعذر الاتصال بالسيرفر.';
+                msg.style.color = '#b00';
+                msg.style.display = 'block';
+                setTimeout(closeOrderModal, 1800);
+            });
+        }
+        // إغلاق النافذة عند الضغط خارجها
+        window.onclick = function(event) {
+            var modal = document.getElementById('orderModal');
+            if (event.target == modal) { closeOrderModal(); }
+        }
+
+        // فتح نافذة الطلب تلقائياً إذا تم تمرير باراميتر open_modal=1 وservice_name
+        window.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('open_modal') === '1' && urlParams.get('service_name')) {
+                // البحث عن الخدمة المطلوبة في القائمة
+                var serviceName = urlParams.get('service_name');
+                var foundService = null;
+                // ابحث عن كارت الخدمة المطابقة
+                var cards = document.querySelectorAll('.service-card');
+                for (var i = 0; i < cards.length; i++) {
+                    var title = cards[i].querySelector('.service-title');
+                    if (title && title.textContent.trim() === serviceName.trim()) {
+                        var serviceId = cards[i].querySelector('button.service-btn')?.getAttribute('onclick');
+                        if (serviceId) {
+                            // استخراج id من الكود
+                            var matches = serviceId.match(/openOrderModal\('(\\d+)',/);
+                            if (matches && matches[1]) {
+                                openOrderModal(matches[1], serviceName);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        </script>
+            <h2 style="color:#007bff;margin-bottom:10px;">Streaming Account Services</h2>
+            <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;direction:ltr;background:#fff;box-shadow:0 2px 8px #e3eafc;margin-bottom:30px;">
+                <thead>
+                    <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Service</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Delivery</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Price</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Order</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Adobe Creative Cloud Pro | 4 Months</td><td>1-24 Hours</td><td>$37</td><td><a href="/order?service=Adobe+Creative+Cloud+Pro" class="service-btn">Order</a></td></tr>
+                    <tr><td>Apple Music 1 Month</td><td>1-24 Hours</td><td>$6</td><td><a href="/order?service=Apple+Music+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Apple Music 3 Months</td><td>1-24 Hours</td><td>$9</td><td><a href="/order?service=Apple+Music+3+Months" class="service-btn">Order</a></td></tr>
+                    <tr><td>Apple TV - 1 Month</td><td>1-24 Hours</td><td>$7</td><td><a href="/order?service=Apple+TV+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>ChatGPT Premium 12 Months - Exclusive</td><td>1-24 Hours</td><td>$50</td><td><a href="/order?service=ChatGPT+Premium+12+Months" class="service-btn">Order</a></td></tr>
+                    <tr><td>Crunchyroll Account (1 Month)</td><td>1-24 Hours</td><td>$5</td><td><a href="/order?service=Crunchyroll+Account+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Directv Go Account (1 Month)</td><td>1-24 Hours</td><td>$9</td><td><a href="/order?service=Directv+Go+Account+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Disney Plus + Star + (1 Month)</td><td>1-24 Hours</td><td>$9</td><td><a href="/order?service=Disney+Plus+Star+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Flujo TV - Magis Tv Streaming Account - 1 Month</td><td>1-24 Hours</td><td>$6</td><td><a href="/order?service=Flujo+TV+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Flujo TV - Magis Tv Streaming Account - 12 Months +2 Months Free</td><td>1-24 Hours</td><td>$43</td><td><a href="/order?service=Flujo+TV+12+Months" class="service-btn">Order</a></td></tr>
+                    <tr><td>Flujo TV - Magis Tv Streaming Account - 3 Month</td><td>1-24 Hours</td><td>$11</td><td><a href="/order?service=Flujo+TV+3+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Flujo TV - Magis Tv Streaming Account - 6 Months +1 Month Free</td><td>1-24 Hours</td><td>$23</td><td><a href="/order?service=Flujo+TV+6+Months" class="service-btn">Order</a></td></tr>
+                    <tr><td>Gemini IA PRO 12 Months</td><td>1-24 Hours</td><td>$7.5</td><td><a href="/order?service=Gemini+IA+PRO+12+Months" class="service-btn">Order</a></td></tr>
+                    <tr><td>Hbo Max Account (1 Month)</td><td>1-24 Hours</td><td>$6</td><td><a href="/order?service=Hbo+Max+Account+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Nba League Pass 1 Month</td><td>1-24 Hours</td><td>$7</td><td><a href="/order?service=Nba+League+Pass+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Netflix Account - Full Worldwide 1 Month</td><td>1-24 Hours</td><td>$12</td><td><a href="/order?service=Netflix+Account+Full+Worldwide+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Netflix Account / One Profile - Full Worldwide 1 Month</td><td>1-24 Hours</td><td>$7</td><td><a href="/order?service=Netflix+Account+One+Profile+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Paramount+ Account (1 Month)</td><td>1-24 Hours</td><td>$6</td><td><a href="/order?service=Paramount+Account+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Prime Video Account (1 Month)</td><td>1-24 Hours</td><td>$6</td><td><a href="/order?service=Prime+Video+Account+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Spotify Account (3 Month)</td><td>1-24 Hours</td><td>$11</td><td><a href="/order?service=Spotify+Account+3+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Tidal 2 Months</td><td>1-24 Hours</td><td>$7.5</td><td><a href="/order?service=Tidal+2+Months" class="service-btn">Order</a></td></tr>
+                    <tr><td>Ufc Fight Pass Suscripción</td><td>Minutes</td><td>$9</td><td><a href="/order?service=Ufc+Fight+Pass" class="service-btn">Order</a></td></tr>
+                    <tr><td>Youtube Premium Account (personal) - 1 Month</td><td>1-24 Hours</td><td>$5</td><td><a href="/order?service=Youtube+Premium+Account+1+Month" class="service-btn">Order</a></td></tr>
+                    <tr><td>Youtube Premium Account (personal) - 3 month</td><td>1-24 Hours</td><td>$9</td><td><a href="/order?service=Youtube+Premium+Account+3+Month" class="service-btn">Order</a></td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <!-- GSM Tools Services -->
+            <h2 style="color:#007bff;margin-bottom:10px;">GSM Tools & IMEI Services</h2>
+            <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;direction:ltr;background:#fff;box-shadow:0 2px 8px #e3eafc;margin-bottom:30px;">
+                <thead>
+                    <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Service</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Delivery</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Price</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Order</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>US Dish Boost Locked Policy Unlock Services (Clean Only) iPhone 6S - 15 Series | Direct Source</td><td>1-10 days</td><td>$107</td><td><a href="/order?service=US+Dish+Boost+Unlock" class="service-btn">Order</a></td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <!-- iCloud Tools -->
+            <h2 style="color:#007bff;margin-bottom:10px;"> Amrr iCloud Tools </h2>
+            <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;direction:ltr;background:#fff;box-shadow:0 2px 8px #e3eafc;margin-bottom:30px;">
+                <thead>
+                    <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Service</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Delivery</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Price</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Order</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Amrr iCloud Tool A5 iOS 9.3.5 Bypass No Need Arduino [iP 5G/5C/iPad 4 Not Supported]</td><td>Instant</td><td>$3.01</td><td><a href="/order?service=Amrr+iCloud+Tool+A5" class="service-btn">Order</a></td></tr>
+                    <tr><td>Amrr-Unlocker Open Menu iCloud FMI OFF NO Need PC</td><td>Instant</td><td>$2</td><td><a href="/order?service=Amrr-Unlocker+Open+Menu" class="service-btn">Order</a></td></tr>
+                    <tr><td>Amrr iCloud Hello Screen Ramdisk 6S Till iPhone X & iPads [NO SIGNAL]</td><td>Instant</td><td>$1.01</td><td><a href="/order?service=Amrr+iCloud+Hello+Screen+Ramdisk" class="service-btn">Order</a></td></tr>
+                    <tr><td>Amrr Bypass A12+Tool V 1.1 [IOS 18.7.2 - 26.1 ONLY] Windows Tool [No Refund Any Order]</td><td>Instant</td><td>$3.01</td><td><a href="/order?service=Amrr+Bypass+A12+Tool+V1.1" class="service-btn">Order</a></td></tr>
+                    <tr><td>Amrr iCloud Bypass MDM iPhone - iPad, iOS 9 / iOS 26.3</td><td>Instant</td><td>$2.01</td><td><a href="/order?service=Amrr+iCloud+Bypass+MDM" class="service-btn">Order</a></td></tr>
+                    <tr><td>Amrr iCloud A12+Tool Version 2 [IOS 18.7.2 - 26.1 ONLY] China Supported</td><td>Instant</td><td>$7</td><td><a href="/order?service=Amrr+iCloud+A12+Tool+V2" class="service-btn">Order</a></td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <!-- ALL TOOLS BYPASS ICLOUD A12+ NO SIGNAL -->
+            <h2 style="color:#007bff;margin-bottom:10px;">ALL TOOLS BYPASS ICLOUD A12+ NO SIGNAL</h2>
+            <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;direction:ltr;background:#fff;box-shadow:0 2px 8px #e3eafc;margin-bottom:30px;">
+                <thead>
+                    <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Service</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Delivery</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Price</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Order</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>OTIX iDISK CLEANER PREMIUM | A12+ Bypass Device Full Erased Without Relock</td><td>Instant</td><td>$5.5</td><td><a href="/order?service=OTIX+iDISK+CLEANER+PREMIUM" class="service-btn">Order</a></td></tr>
+                    <tr><td>iRemoval Pro A12+ v.5.2.1 [IOS 18.7.2 - 26.1 ONLY] Windows Tool</td><td>Instant</td><td>$11</td><td><a href="/order?service=iRemoval+Pro+A12+v5.2.1" class="service-btn">Order</a></td></tr>
+                    <tr><td>iAIdaz Premium Bypass A12+ - All Models XS Till 17 Pro Max [IOS 18.7.2 - 26.1 ONLY] Mac / Win</td><td>Instant</td><td>$7.3</td><td><a href="/order?service=iAIdaz+Premium+Bypass+A12+All+Models" class="service-btn">Order</a></td></tr>
+                    <tr><td>OTIX Activator Pro | A12+ Premium Bypass - No Signal With ICloud Services | All Models iPhone & iPad [IOS 18.7.2 - 26.1 ONLY]</td><td>Instant</td><td>$12.4</td><td><a href="/order?service=OTIX+Activator+Pro+A12+Premium+Bypass" class="service-btn">Order</a></td></tr>
+                    <tr><td>HFZ Activator A12+ Premuim Tool BYPASS NO SIGNAL (A12 All Models) [IOS 18.7.2 - 26.1 ONLY] Mac / Win</td><td>Instant</td><td>$4.5</td><td><a href="/order?service=HFZ+Activator+A12+Premium+Tool" class="service-btn">Order</a></td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <!-- Rebypass A12+ Tools -->
+            <h2 style="color:#007bff;margin-bottom:10px;">Rebypass A12+ Tools</h2>
+            <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;direction:ltr;background:#fff;box-shadow:0 2px 8px #e3eafc;margin-bottom:30px;">
+                <thead>
+                    <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Service</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Delivery</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Price</th>
+                        <th style="padding:10px 8px;border:1px solid #e3eafc;">Order</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>iRemoval Rebypass OLD registred devices before 31.10.2024</td><td>Instant</td><td>$5</td><td><a href="/order?service=iRemoval+Rebypass+OLD" class="service-btn">Order</a></td></tr>
+                    <tr><td>LPro A12+ Rebypass Till 18.1.1 with Network - Without Network Check With The Tool - Promotion</td><td>Minutes</td><td>$5.5</td><td><a href="/order?service=LPro+A12+Rebypass+Till+18.1.1" class="service-btn">Order</a></td></tr>
+                    <tr><td>Mina A12+ Rebypass Bypass With Signal</td><td>Instant</td><td>$8.5</td><td><a href="/order?service=Mina+A12+Rebypass+With+Signal" class="service-btn">Order</a></td></tr>
+                </tbody>
+            </table>
+            </div>
+
+            <!-- يمكنك إضافة باقي الفئات بنفس النمط: Licenses, IPTV, Gift Cards, إلخ -->
+            <a href="/" style="display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;">العودة للرئيسية</a>
+        </div>
+    </div>
+</body>
+</html>

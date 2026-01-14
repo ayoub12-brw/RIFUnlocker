@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توثيق API الخدمات</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .doc-container {max-width:700px;margin:40px auto;background:#fafdff;padding:32px 28px;border-radius:12px;box-shadow:0 2px 12px #e3eafc;direction:rtl;}
+        .doc-container h1 {color:#007bff;margin-bottom:18px;}
+        .doc-container h2 {color:#219150;margin-top:32px;}
+        .doc-container code, .doc-container pre {background:#f3f6fa;padding:4px 8px;border-radius:6px;font-family:monospace;direction:ltr;}
+        .doc-container pre {display:block;overflow-x:auto;margin:12px 0;}
+        .doc-container .endpoint {color:#007bff;font-weight:600;}
+        .doc-container .header {color:#e67e22;}
+        .doc-container .json {color:#222b45;}
+        .navbar {background-color: #007bff; padding: 10px 0;}
+        .nav-container {max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;}
+        .nav-logo {color: #fff; font-size: 24px; font-weight: bold; text-decoration: none;}
+        .nav-links {list-style: none; margin: 0; padding: 0; display: flex;}
+        .nav-links li {margin-left: 20px;}
+        .nav-links a {color: #fff; text-decoration: none; font-size: 16px;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="doc-container">
+        <div style="text-align:left;margin-bottom:12px;">
+            <form method="get" style="display:inline;">
+                <select name="lang" onchange="this.form.submit()">
+                    {% for l in LANGUAGES %}
+                        <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <h1>{{ _t('api_services_docs') if _t('api_services_docs') != 'api_services_docs' }}</h1>
+        <p>كل خدمة فعالة لها endpoint خاص بها. يجب إرسال <b>X-API-KEY</b> في الهيدر، وسيتم خصم الكريدي تلقائياً.</p>
+        <h2>Endpoints المتاحة</h2>
+        <ul>
+            <li><b>FRP Xiaomi:</b> <code class="endpoint">POST /api/frpxiaomi/call</code></li>
+            <li><b>Samsung FRP:</b> <code class="endpoint">POST /api/samsungfrp/call</code></li>
+            <li><b>iCloud Check:</b> <code class="endpoint">POST /api/icloudcheck/call</code></li>
+            <li><b>IMEI Info:</b> <code class="endpoint">POST /api/imeiinfo/call</code></li>
+            <li><b>MDM Status:</b> <code class="endpoint">POST /api/mdmstatus/call</code></li>
+        </ul>
+        <h2>Headers</h2>
+        <pre>X-API-KEY: &lt;api_key&gt;
+Content-Type: application/json</pre>
+        <h2>Body (مثال)</h2>
+        <pre class="json">{
+  "imei": "356123456789012",
+  "model": "Samsung A12"
+}</pre>
+        <h2>Response (نجاح)</h2>
+        <pre class="json">{
+  "success": true,
+  "message": "FRP Xiaomi API call received",
+  "handler": "frp_xiaomi_handler",
+  "imei": "356123456789012",
+  "model": "Samsung A12",
+  "user": "username"
+}</pre>
+        <h2>Response (خطأ)</h2>
+        <pre class="json">{
+  "success": false,
+  "error": "Insufficient credits"
+}</pre>
+        <h2>ملاحظات</h2>
+        <ul>
+            <li>كل خدمة لها handler خاص بها (مذكور في الرد).</li>
+            <li>الخدمات التي حالتها OFF سترفض الطلب.</li>
+            <li>سيتم خصم الكريدي تلقائياً عند كل طلب ناجح.</li>
+        </ul>
+    </div>
+</body>
+</html>

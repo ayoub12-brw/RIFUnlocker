@@ -1,0 +1,189 @@
+body {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e3f0ff 0%, #f7fbff 100%);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 420px;
+    margin: 60px auto;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0, 123, 255, 0.10), 0 1.5px 6px rgba(0,0,0,0.04);
+    padding: 36px 28px 32px 28px;
+    text-align: center;
+    border: 1.5px solid #e3eafc;
+}
+
+h1 {
+    color: #007bff;
+    margin-bottom: 28px;
+    font-size: 2.1em;
+    letter-spacing: 1px;
+    font-weight: 700;
+}
+
+label {
+    display: block;
+    margin-bottom: 12px;
+    color: #222b45;
+    font-size: 1.08em;
+    font-weight: 500;
+}
+
+input[type="text"] {
+    width: 94%;
+    padding: 12px 10px;
+    margin-bottom: 22px;
+    border: 1.5px solid #b6d4fe;
+    border-radius: 7px;
+    font-size: 1.08em;
+    transition: border 0.2s;
+    outline: none;
+    background: #fafdff;
+}
+input[type="text"]:focus {
+    border: 1.5px solid #007bff;
+    background: #f0f7ff;
+}
+
+button {
+    background: linear-gradient(90deg, #007bff 60%, #0056b3 100%);
+    color: #fff;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 7px;
+    font-size: 1.08em;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+    transition: background 0.2s, box-shadow 0.2s;
+    letter-spacing: 0.5px;
+}
+button:hover {
+    background: linear-gradient(90deg, #0056b3 60%, #007bff 100%);
+    box-shadow: 0 4px 16px rgba(0,123,255,0.13);
+}
+
+.result {
+    margin-top: 22px;
+    padding: 16px;
+    background: #eaf4ff;
+    border: 1.5px solid #b6d4fe;
+    border-radius: 7px;
+    color: #007bff;
+    font-weight: bold;
+    font-size: 1.08em;
+    box-shadow: 0 1px 4px rgba(0,123,255,0.07);
+}
+
+.navbar {
+    background: #fff;
+    border-bottom: 1.5px solid #e3eafc;
+    box-shadow: 0 2px 8px rgba(0,123,255,0.07);
+    padding: 0 0 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+.nav-container {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    height: 56px;
+}
+.nav-logo {
+    color: #007bff;
+    font-size: 1.35em;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 1px;
+}
+.nav-links {
+    list-style: none;
+    display: flex;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+}
+.nav-links li {
+    display: inline-block;
+}
+.nav-links a {
+    color: #222b45;
+    text-decoration: none;
+    font-size: 1.08em;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: 6px;
+    transition: background 0.18s, color 0.18s;
+}
+.nav-links a:hover, .nav-links a.active {
+    background: #eaf4ff;
+    color: #007bff;
+}
+@media (max-width: 600px) {
+    .nav-container { flex-direction: column; height: auto; padding: 0 8px; }
+    .nav-links { flex-direction: column; gap: 0; width: 100%; }
+    .nav-links a { display: block; width: 100%; text-align: right; }
+    .container {
+        max-width: 98vw;
+        margin: 18px auto;
+        padding: 12px 4vw 18px 4vw;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.10);
+        font-size: 0.98em;
+    }
+    h1 {
+        font-size: 1.3em;
+        margin-bottom: 16px;
+    }
+    label, .result, .user-info, .credit-btns button, .orders-title, .orders-table th, .orders-table td {
+        font-size: 0.98em !important;
+    }
+    .user-panel, .user-info, .credit-btns, .orders-table, .logs-table {
+        padding: 8px 4vw !important;
+        border-radius: 8px !important;
+    }
+    .credit-btns button {
+        padding: 7px 12px !important;
+        font-size: 0.98em !important;
+    }
+    .orders-table th, .orders-table td, .logs-table th, .logs-table td {
+        padding: 6px 2px !important;
+    }
+    .nav-logo {
+        font-size: 1.1em;
+    }
+    .user-panel img {
+        width: 44px !important;
+        height: 44px !important;
+    }
+    .user-panel .user-info {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    .user-panel .user-info div {
+        font-size: 0.98em !important;
+    }
+    .user-panel .user-info span {
+        font-size: 0.98em !important;
+    }
+    .user-panel .credit-btns {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+    .user-panel .credit-btns form {
+        width: 100% !important;
+    }
+    .user-panel .credit-btns button {
+        width: 100% !important;
+        margin-left: 0 !important;
+        margin-bottom: 8px !important;
+    }
+}
+}

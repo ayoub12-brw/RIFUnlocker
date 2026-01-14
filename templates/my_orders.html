@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar">
+</head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل طلباتي</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {font-family: 'Cairo', Arial, sans-serif; background: #fafdff; margin:0;}
+        .navbar {background: linear-gradient(90deg, #007bff 60%, #219150 100%); border-bottom: 2px solid #e3eafc; padding: 10px 0; position: relative; z-index: 1000; box-shadow: 0 2px 8px #e3eafc; direction: rtl;}
+        .nav-container {max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center;}
+        .nav-logo {font-size: 1.7em; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: 1px; display:flex;align-items:center;gap:7px;}
+        .nav-links {list-style: none; padding: 0; margin: 0; display: flex; gap: 15px;}
+        .nav-links li {margin: 0;}
+        .nav-links a {color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;}
+        .nav-links a:hover {background: #fff; color: #007bff;}
+        .container {max-width: 950px; margin: 40px auto 0 auto; background: #fff; border-radius: 18px; box-shadow: 0 2px 12px #e3eafc; padding: 32px 24px;}
+        .orders-title {margin-bottom:28px;color:#007bff;font-size:1.5em;font-weight:700;text-align:center;}
+        .orders-table {width:100%;margin-top:10px;border-collapse:collapse;direction:rtl;box-shadow:0 2px 10px #e3eafc;}
+        .orders-table th, .orders-table td {border:1.5px solid #e3eafc;padding:10px 12px;text-align:right;}
+        .orders-table th {background:#eaf4ff;color:#007bff;font-weight:700;}
+        .orders-table tr:nth-child(even) {background:#fafdff;}
+        .orders-table tr:nth-child(odd) {background:#fff;}
+        .orders-table td .fa-solid {margin-left:6px;}
+        .back-link {display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;font-weight:600;}
+        @media (max-width: 700px) {.container {padding: 12px 2vw;} .orders-table th,.orders-table td{font-size:0.95em;padding:7px 4px;}}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo"><i class="fa-solid fa-unlock-keyhole"></i> RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/"><i class="fa-solid fa-house"></i> الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}"><i class="fa-solid fa-list"></i> الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}"><i class="fa-solid fa-list-check"></i> طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li style="position:absolute;left:18px;top:10px;background:#eaf4ff;color:#219150;border-radius:6px;padding:5px 12px;font-size:0.95em;font-weight:700;display:flex;align-items:center;gap:7px;">
+                    <i class="fa-solid fa-coins"></i>
+                    {% set credits = g.user['credits'] if g.user and 'credits' in g.user else 0 %}
+                    {{ credits }} نقطة
+                    <a href="/panel" style="color:#888;margin-left:2px;font-size:1em;" title="إعدادات الحساب"><i class="fa-solid fa-gear"></i></a>
+                </li>
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login"><i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول</a></li>
+                {% endif %}
+                <li style="margin-right:18px;">
+                    <form method="get" style="display:inline;">
+                        <select name="lang" onchange="this.form.submit()" style="padding:5px 12px;border-radius:6px;border:1px solid #e3eafc;">
+                            {% for l in LANGUAGES %}
+                                <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                            {% endfor %}
+                        </select>
+                        {% for key, value in request.args.items() %}
+                            {% if key != 'lang' %}
+                                <input type="hidden" name="{{key}}" value="{{value}}">
+                            {% endif %}
+                        {% endfor %}
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="orders-title">{{ _t('my_orders') if _t('my_orders') != 'my_orders' else 'سجل طلباتي' }}</div>
+        <form method="get" style="margin-bottom:18px;text-align:right;display:flex;gap:18px;align-items:center;flex-wrap:wrap;justify-content:center;">
+            <div>
+                <label for="service_filter" style="font-weight:500;color:#222b45;">{{ _t('service_filter') if _t('service_filter') != 'service_filter' else 'تصفية حسب الخدمة:' }}</label>
+                <select id="service_filter" name="service" onchange="this.form.submit()" style="padding:6px 12px;border-radius:5px;border:1.5px solid #b6d4fe;min-width:120px;">
+                    <option value="">{{ _t('all') if _t('all') != 'all' else 'الكل' }}</option>
+                    <!-- يمكن تعميم الخدمات ديناميكياً هنا -->
+                </select>
+            </div>
+            <div>
+                <label for="status_filter" style="font-weight:500;color:#222b45;">{{ _t('status_filter') if _t('status_filter') != 'status_filter' else 'تصفية حسب الحالة:' }}</label>
+                <select id="status_filter" name="status" onchange="this.form.submit()" style="padding:6px 12px;border-radius:5px;border:1.5px solid #b6d4fe;min-width:120px;">
+                    <option value="">{{ _t('all') if _t('all') != 'all' else 'الكل' }}</option>
+                    <option value="Pending" {% if status_filter=='Pending' %}selected{% endif %}>{{ _t('pending') if _t('pending') != 'pending' else 'بانتظار التنفيذ' }}</option>
+                    <option value="Processing" {% if status_filter=='Processing' %}selected{% endif %}>{{ _t('processing') if _t('processing') != 'processing' else 'قيد التنفيذ' }}</option>
+                    <option value="Done" {% if status_filter=='Done' %}selected{% endif %}>{{ _t('done') if _t('done') != 'done' else 'تم' }}</option>
+                    <option value="Failed" {% if status_filter=='Failed' %}selected{% endif %}>{{ _t('failed') if _t('failed') != 'failed' else 'فشل التنفيذ' }}</option>
+                </select>
+            </div>
+        </form>
+        {% if orders %}
+        <table class="orders-table">
+            <tr>
+                <th>{{ _t('date') if _t('date') != 'date' else 'التاريخ' }}</th>
+                <th>{{ _t('service') if _t('service') != 'service' else 'الخدمة' }}</th>
+                <th>{{ _t('name') if _t('name') != 'name' else 'الاسم' }}</th>
+                <th>{{ _t('phone') if _t('phone') != 'phone' else 'رقم الهاتف' }}</th>
+                <th>IMEI/SN</th>
+                <th>{{ _t('details') if _t('details') != 'details' else 'تفاصيل إضافية' }}</th>
+                <th>{{ _t('status') if _t('status') != 'status' else 'الحالة' }}</th>
+            </tr>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.date }}</td>
+                <td>{{ order.service }}</td>
+                <td>{{ order.name }}</td>
+                <td>{{ order.phone }}</td>
+                <td>{{ order.imei }}</td>
+                <td>{{ order.details }}</td>
+                <td>
+                    {% if order.status == 'Pending' %}
+                        <span style="color:#b6b600;font-weight:700;"><i class="fa-solid fa-hourglass-half"></i> بانتظار التنفيذ</span>
+                    {% elif order.status == 'Processing' %}
+                        <span style="color:#f39c12;font-weight:700;"><i class="fa-solid fa-spinner fa-spin"></i> قيد التنفيذ</span>
+                    {% elif order.status == 'Done' %}
+                        <span style="color:#27ae60;font-weight:700;"><i class="fa-solid fa-circle-check"></i> تم</span>
+                    {% elif order.status == 'Failed' %}
+                        <span style="color:#e74c3c;font-weight:700;"><i class="fa-solid fa-circle-xmark"></i> فشل التنفيذ</span>
+                    {% else %}
+                        {{ order.status }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <div style="color:#888;margin-top:30px;">لا توجد طلبات حالياً.</div>
+        {% endif %}
+        <a href="/panel" class="back-link">العودة للوحة المستخدم</a>
+    </div>
+</body>
+</html>

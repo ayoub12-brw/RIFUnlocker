@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة إدارة الطلبات</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .orders-table {width:100%;margin-top:30px;border-collapse:collapse;direction:rtl;}
+        .orders-table th, .orders-table td {border:1.5px solid #e3eafc;padding:8px 10px;text-align:right;}
+        .orders-table th {background:#eaf4ff;color:#007bff;font-weight:700;}
+        .orders-table tr:nth-child(even) {background:#fafdff;}
+        .orders-table tr:nth-child(odd) {background:#fff;}
+        .orders-title {margin-bottom:18px;color:#007bff;font-size:1.3em;font-weight:700;}
+        .back-link {display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;}
+        .navbar {background-color: #007bff; padding: 10px 0; direction: rtl;}
+        .nav-container {max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center;}
+        .nav-logo {color: #fff; font-size: 1.5em; font-weight: 700; text-decoration: none;}
+        .nav-links {list-style: none; padding: 0; margin: 0; display: flex;}
+        .nav-links li {margin-left: 20px;}
+        .nav-links a {color: #fff; text-decoration: none; font-weight: 500;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div style="text-align:left;margin-bottom:12px;">
+            <form method="get" style="display:inline;">
+                <select name="lang" onchange="this.form.submit()">
+                    {% for l in LANGUAGES %}
+                        <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div class="orders-title">{{ _t('admin_orders') if _t('admin_orders') != 'admin_orders' else 'جميع طلبات الخدمات' }}</div>
+        {% if orders %}
+        <table class="orders-table">
+            <tr>
+                <th>التاريخ</th>
+                <th>الخدمة</th>
+                <th>الاسم</th>
+                <th>رقم الهاتف</th>
+                <th>IMEI/SN</th>
+                <th>تفاصيل إضافية</th>
+                <th>الحالة</th>
+                <th>تغيير الحالة</th>
+            </tr>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.date }}</td>
+                <td>{{ order.service }}</td>
+                <td>{{ order.name }}</td>
+                <td>{{ order.phone }}</td>
+                <td>{{ order.imei }}</td>
+                <td>{{ order.details }}</td>
+                <td>{{ order.status }}</td>
+                <td>
+                    <form method="post" action="/admin/orders" style="margin:0;">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <select name="new_status" style="padding:3px 8px;border-radius:4px;">
+                            <option value="Pending" {% if order.status=='Pending' %}selected{% endif %}>بانتظار التنفيذ</option>
+                            <option value="Processing" {% if order.status=='Processing' %}selected{% endif %}>قيد التنفيذ</option>
+                            <option value="Done" {% if order.status=='Done' %}selected{% endif %}>تم</option>
+                            <option value="Failed" {% if order.status=='Failed' %}selected{% endif %}>فشل التنفيذ</option>
+                        </select>
+                        <button type="submit" style="padding:3px 10px;border-radius:4px;background:#007bff;color:#fff;border:none;">تحديث</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <div style="color:#888;margin-top:30px;">لا توجد طلبات حالياً.</div>
+        {% endif %}
+        <a href="/" class="back-link">العودة للرئيسية</a>
+        <a href="/admin/credits" class="back-link" style="margin-right:18px;">إدارة رصيد المستخدمين</a>
+        <a href="/admin/credit-logs" class="back-link" style="margin-right:18px;">سجل الكريدي (الإدارة)</a>
+        <a href="/admin/users" class="back-link" style="margin-right:18px;">إدارة المستخدمين</a>
+        <a href="/admin/services" class="back-link" style="margin-right:18px;">إدارة الخدمات والأسعار</a>
+        <a href="/admin/recharge-requests" class="back-link" style="margin-right:18px;">طلبات شحن الرصيد</a>
+    </div>
+</body>
+</html>

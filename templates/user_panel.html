@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة المستخدم</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <style>
+        .user-panel {margin-top:30px;text-align:right;}
+        .user-panel h2 {color:#007bff;margin-bottom:18px;}
+        .user-info {background:#eaf4ff;padding:16px 18px;border-radius:8px;margin-bottom:18px;}
+        .user-info span {font-weight:600;}
+        .credit-btns {margin-top:18px;}
+        .credit-btns form {display:inline;}
+        .credit-btns button {
+            background: linear-gradient(90deg, #27ae60 60%, #219150 100%);
+            color: #fff;
+            border: none;
+            padding: 7px 18px;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            margin-left: 8px;
+            transition: background 0.2s;
+        }
+        .credit-btns button:hover {background: linear-gradient(90deg, #219150 60%, #27ae60 100%);}
+        .credit-success {color:#27ae60;font-weight:600;margin-top:10px;}
+        .credit-error {color:#e74c3c;font-weight:600;margin-top:10px;}
+        .navbar {
+            background: linear-gradient(90deg, #007bff 60%, #219150 100%);
+            border-bottom: 2px solid #e3eafc;
+            padding: 10px 0;
+            position: relative;
+            z-index: 1000;
+            box-shadow: 0 2px 8px #e3eafc;
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-logo {
+            font-size: 1.7em;
+            font-weight: 700;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+        .nav-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 15px;
+        }
+        .nav-links li {
+            display: inline;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 1.08em;
+            transition: background 0.3s, color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-links a:hover {
+            background: #fff;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo"><i class="fa-solid fa-unlock-keyhole"></i> RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/"><i class="fa-solid fa-house"></i> الرئيسية</a></li>
+                <li><a href="/my_orders?lang={{lang}}"><i class="fa-solid fa-list-check"></i> طلباتي</a></li>
+                <li><a href="/services?lang={{lang}}"><i class="fa-solid fa-screwdriver-wrench"></i> الخدمات</a></li>
+                {% if user and user['is_admin'] %}
+                <li><a href="/admin/services"><i class="fa-solid fa-user-shield"></i> لوحة الإدارة</a></li>
+                {% endif %}
+                {% if session.get('user_id') %}
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> خروج</a></li>
+                {% else %}
+                <li><a href="/login"><i class="fa-solid fa-right-to-bracket"></i> دخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container" style="max-width:700px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <div style="display:flex;align-items:center;gap:16px;">
+                <img src="/static/avatar.png" alt="الصورة الشخصية" style="width:64px;height:64px;border-radius:50%;background:#eaf4ff;object-fit:cover;">
+                <div>
+                    <div style="font-size:1.25em;color:#007bff;font-weight:700;">{{ user['username'] }}</div>
+                    <div style="color:#444;font-size:1em;">{{ user['email'] }}</div>
+                </div>
+            </div>
+            <div style="background:linear-gradient(90deg,#27ae60 60%,#219150 100%);color:#fff;padding:12px 22px;border-radius:12px;display:flex;align-items:center;gap:8px;font-size:1.15em;font-weight:700;box-shadow:0 2px 8px #e3eafc;">
+                <i class="fa-solid fa-coins"></i> {{ user['credits'] }} {{ _t('credit_points') }}
+            </div>
+        </div>
+        <div style="display:flex;gap:12px;margin-bottom:18px;">
+            <a href="/reset-password" style="background:#eaf4ff;color:#007bff;padding:8px 18px;border-radius:8px;font-weight:600;font-size:1em;display:flex;align-items:center;gap:7px;text-decoration:none;"><i class="fa-solid fa-key"></i> تغيير كلمة المرور</a>
+            <a href="mailto:{{ user['email'] }}" style="background:#eaf4ff;color:#219150;padding:8px 18px;border-radius:8px;font-weight:600;font-size:1em;display:flex;align-items:center;gap:7px;text-decoration:none;"><i class="fa-solid fa-envelope"></i> تعديل الإيميل</a>
+        </div>
+        <div style="background:#fafdff;border-radius:12px;padding:18px 16px;margin-bottom:18px;box-shadow:0 2px 8px #e3eafc;">
+            <div style="font-size:1.1em;color:#007bff;font-weight:700;margin-bottom:10px;"><i class="fa-solid fa-clock-rotate-left"></i> آخر عمليات الرصيد</div>
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                        <th style="padding:7px 6px;">التاريخ</th>
+                        <th style="padding:7px 6px;">العملية</th>
+                        <th style="padding:7px 6px;">القيمة</th>
+                        <th style="padding:7px 6px;">السبب</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in user.credit_logs[:5] %}
+                    <tr>
+                        <td>{{ log['created_at'] }}</td>
+                        <td>{{ log['action'] }}</td>
+                        <td>{{ log['amount'] }}</td>
+                        <td>{{ log['reason'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="background:#fafdff;border-radius:12px;padding:18px 16px;margin-bottom:18px;box-shadow:0 2px 8px #e3eafc;">
+            <div style="font-size:1.1em;color:#007bff;font-weight:700;margin-bottom:10px;"><i class="fa-solid fa-list-check"></i> آخر الطلبات</div>
+            <table style="width:100%;border-collapse:collapse;">
+                <thead>
+                    <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                        <th style="padding:7px 6px;">الخدمة</th>
+                        <th style="padding:7px 6px;">الحالة</th>
+                        <th style="padding:7px 6px;">تاريخ الطلب</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in user.last_orders[:3] %}
+                    <tr>
+                        <td>{{ order['service'] }}</td>
+                        <td>{{ order['status'] }}</td>
+                        <td>{{ order['created_at'] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div style="display:flex;gap:12px;margin-top:18px;">
+            <a href="/recharge" style="background:linear-gradient(90deg,#27ae60 60%,#219150 100%);color:#fff;padding:10px 22px;border-radius:10px;font-weight:600;font-size:1.08em;text-decoration:none;box-shadow:0 2px 8px #e3eafc;"><i class="fa-solid fa-plus"></i> شحن الرصيد</a>
+            <a href="/my_orders" style="background:#eaf4ff;color:#007bff;padding:10px 22px;border-radius:10px;font-weight:600;font-size:1.08em;text-decoration:none;box-shadow:0 2px 8px #e3eafc;"><i class="fa-solid fa-list-check"></i> سجل الطلبات</a>
+            <a href="/logout" style="background:#fff;color:#e74c3c;padding:10px 22px;border-radius:10px;font-weight:600;font-size:1.08em;text-decoration:none;box-shadow:0 2px 8px #e3eafc;border:1.5px solid #e74c3c;"><i class="fa-solid fa-right-from-bracket"></i> خروج</a>
+        </div>
+    </div>
+</body>
+</html>

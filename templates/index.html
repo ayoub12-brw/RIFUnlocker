@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RIF Unlocker</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {font-family: 'Cairo', Arial, sans-serif; background: #fafdff; margin:0;}
+        .main-banner {background: linear-gradient(90deg, #007bff 60%, #219150 100%); color: #fff; padding: 48px 0 32px 0; text-align: center; border-radius:0 0 32px 32px; box-shadow:0 2px 12px #e3eafc;}
+        .main-banner img {height:80px;margin-bottom:12px;}
+        .main-banner h1 {font-size:2.3em;margin:0 0 12px 0;letter-spacing:1px;}
+        .main-banner p {font-size:1.15em;margin:0;}
+        .navbar {background: linear-gradient(90deg, #007bff 60%, #219150 100%); border-bottom: 2px solid #e3eafc; padding: 10px 0; position: relative; z-index: 1000; box-shadow: 0 2px 8px #e3eafc;}
+        .nav-container {max-width: 1200px; margin: 0 auto; padding: 0 15px; display: flex; justify-content: space-between; align-items: center;}
+        .nav-logo {font-size: 1.7em; font-weight: 700; color: #fff; text-decoration: none; letter-spacing: 1px; display:flex;align-items:center;gap:7px;}
+        .nav-links {list-style: none; padding: 0; margin: 0; display: flex; gap: 15px;}
+        .nav-links li {margin: 0;}
+        .nav-links a {color: #fff; text-decoration: none; font-weight: 500; font-size: 1.08em; border-radius: 4px; padding: 8px 15px; display: flex; align-items: center; gap: 6px; transition: background 0.3s, color 0.3s;}
+        .nav-links a:hover {background: #fff; color: #007bff;}
+        .container {max-width: 900px; margin: 40px auto 0 auto; background: #fff; border-radius: 18px; box-shadow: 0 2px 12px #e3eafc; padding: 32px 24px;}
+        .services-cards {display: flex; flex-wrap: wrap; gap: 24px; justify-content: center; margin: 40px 0 0 0;}
+        .service-card {background: #fafdff; border-radius: 14px; box-shadow: 0 2px 8px #e3eafc; padding: 28px 22px; width: 260px; text-align: center; transition: transform 0.2s, box-shadow 0.2s; border:1.5px solid #e3eafc;}
+        .service-card:hover {transform: translateY(-7px) scale(1.03); box-shadow: 0 6px 24px #b6d4fe;}
+        .service-card i {font-size: 2.5em; color: #219150; margin-bottom: 12px;}
+        .service-card h3 {margin: 0 0 10px 0; color: #007bff; font-size: 1.2em;}
+        .service-card p {color: #444; font-size: 1em; margin-bottom: 12px;}
+        .service-card a {display: inline-block; background: linear-gradient(90deg, #007bff 60%, #219150 100%); color: #fff; padding: 7px 22px; border-radius: 6px; text-decoration: none; font-weight: 600; transition: background 0.2s;}
+        .service-card a:hover {background: linear-gradient(90deg, #219150 60%, #007bff 100%); color: #fff;}
+        @media (max-width: 700px) {.container {padding: 12px 2vw;} .services-cards {flex-direction: column;gap:18px;} .service-card {width:100%;}}
+    </style>
+</head>
+<body>
+    <!-- بانر علوي ترحيبي -->
+    <div class="main-banner" style="background: linear-gradient(90deg, #007bff 60%, #0056b3 100%); color: #fff; padding: 38px 0 28px 0; text-align: center;">
+        <img src="/static/logo.png" alt="RIF Unlocker" style="height:70px;margin-bottom:10px;">
+        <h1 style="font-size:2.2em;margin:0 0 10px 0;letter-spacing:1px;">مرحباً بك في منصة RIF Unlocker</h1>
+        <p style="font-size:1.1em;margin:0;">أفضل حلول فك الشفرات والخدمات الرقمية بسرعة واحترافية</p>
+    </div>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo"><i class="fa-solid fa-unlock-keyhole"></i> RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/"><i class="fa-solid fa-house"></i> الرئيسية</a></li>
+                <li><a href="/services?category=Server%20Service&lang={{lang}}"><i class="fa-solid fa-server"></i> Server Service</a></li>
+                <li><a href="/services?category=IMEI%20Service&lang={{lang}}"><i class="fa-solid fa-mobile-screen-button"></i> IMEI Service</a></li>
+                <li><a href="/services?lang={{lang}}"><i class="fa-solid fa-list"></i> كل الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}"><i class="fa-solid fa-list-check"></i> طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li style="position:absolute;left:18px;top:10px;background:#eaf4ff;color:#219150;border-radius:6px;padding:5px 12px;font-size:0.95em;font-weight:700;display:flex;align-items:center;gap:7px;">
+                    <i class="fa-solid fa-coins"></i>
+                    {% set credits = g.user['credits'] if g.user and 'credits' in g.user else 0 %}
+                    {{ credits }} نقطة
+                    <a href="/panel" style="color:#888;margin-left:2px;font-size:1em;" title="إعدادات الحساب"><i class="fa-solid fa-gear"></i></a>
+                </li>
+                <li><a href="/logout"><i class="fa-solid fa-right-from-bracket"></i> تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login"><i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول</a></li>
+                {% endif %}
+                <li style="margin-right:18px;">
+                    <form method="get" style="display:inline;">
+                        <select name="lang" onchange="this.form.submit()" style="padding:5px 12px;border-radius:6px;border:1px solid #e3eafc;">
+                            {% for l in LANGUAGES %}
+                                <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                            {% endfor %}
+                        </select>
+                        {% for key, value in request.args.items() %}
+                            {% if key != 'lang' %}
+                                <input type="hidden" name="{{key}}" value="{{value}}">
+                            {% endif %}
+                        {% endfor %}
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <h2 style="color:#007bff;text-align:center;margin-bottom:32px;font-size:1.5em;">خدماتنا الرقمية</h2>
+        <div class="services-cards">
+            <div class="service-card">
+                <i class="fa-solid fa-server"></i>
+                <h3>Server Service</h3>
+                <p>خدمات سيرفر احترافية لفك الشفرات عن بعد بسرعة وأمان.</p>
+                <a href="/services?category=Server%20Service&lang={{lang}}">عرض الخدمات</a>
+            </div>
+            <div class="service-card">
+                <i class="fa-solid fa-mobile-screen-button"></i>
+                <h3>IMEI Service</h3>
+                <p>خدمات IMEI لجميع أنواع الهواتف الذكية والدعم الفوري.</p>
+                <a href="/services?category=IMEI%20Service&lang={{lang}}">عرض الخدمات</a>
+            </div>
+            <!-- تم حذف كارت كل الخدمات بناءً على طلب المستخدم -->
+        </div>
+        <!-- تم حذف نموذج إرسال IMEI بناءً على طلب المستخدم -->
+        <!-- تم حذف نموذج إرسال IMEI بناءً على طلب المستخدم -->
+    </div>
+</body>
+</html>

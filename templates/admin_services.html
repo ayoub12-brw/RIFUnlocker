@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الخدمات والأسعار</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .services-table {width:100%;margin-top:30px;border-collapse:collapse;direction:rtl;}
+        .services-table th, .services-table td {border:1.5px solid #e3eafc;padding:8px 10px;text-align:right;}
+        .services-table th {background:#eaf4ff;color:#007bff;font-weight:700;}
+        .services-table tr:nth-child(even) {background:#fafdff;}
+        .services-table tr:nth-child(odd) {background:#fff;}
+        .services-title {margin-bottom:18px;color:#007bff;font-size:1.3em;font-weight:700;}
+        .back-link {display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;}
+        .action-btn {padding:3px 8px;border-radius:4px;background:#e74c3c;color:#fff;border:none;}
+        .action-btn:hover {background:#c0392b;}
+        .msg-success {color:#27ae60;font-weight:600;}
+        .msg-error {color:#e74c3c;font-weight:600;}
+        .navbar {background:#343a40;color:#fff;padding:10px 0;}
+        .nav-container {max-width:1200px;margin:0 auto;padding:0 15px;display:flex;align-items:center;justify-content:space-between;}
+        .nav-logo {font-size:1.5em;font-weight:700;color:#007bff;text-decoration:none;}
+        .nav-links {list-style:none;padding:0;margin:0;display:flex;gap:15px;}
+        .nav-links li {display:inline;}
+        .nav-links a {color:#fff;text-decoration:none;padding:6px 12px;border-radius:4px;}
+        .nav-links a:hover {background:#007bff;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div style="text-align:left;margin-bottom:12px;">
+            <form method="get" style="display:inline;">
+                <select name="lang" onchange="this.form.submit()">
+                    {% for l in LANGUAGES %}
+                        <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div class="services-title">{{ _t('service_management') }}</div>
+        {% if success %}
+            <div class="msg-success">{{ success }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="msg-error">{{ error }}</div>
+        {% endif %}
+        <form method="post" style="margin-bottom:24px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+            <input type="text" name="service_name" placeholder="اسم الخدمة" required style="padding:6px 12px;border-radius:5px;">
+            <input type="number" name="service_price" placeholder="السعر" min="0" step="0.01" required style="padding:6px 12px;border-radius:5px;width:80px;">
+            <input type="text" name="service_delivery_time" placeholder="مدة التسليم" style="padding:6px 12px;border-radius:5px;width:90px;">
+            <input type="text" name="service_category" placeholder="الفئة" style="padding:6px 12px;border-radius:5px;width:90px;">
+            <input type="text" name="service_description" placeholder="وصف الخدمة" style="padding:6px 12px;border-radius:5px;width:120px;">
+            <input type="text" name="service_notes" placeholder="ملاحظات إدارية" style="padding:6px 12px;border-radius:5px;width:120px;">
+            <input type="text" name="service_image_url" placeholder="رابط صورة/أيقونة" style="padding:6px 12px;border-radius:5px;width:120px;">
+            <input type="text" name="service_created_at" placeholder="تاريخ الإضافة (اختياري)" style="padding:6px 12px;border-radius:5px;width:120px;">
+            <button type="submit" name="add_service" style="padding:6px 18px;border-radius:5px;background:#27ae60;color:#fff;border:none;">إضافة خدمة</button>
+        </form>
+        <table class="services-table">
+            <tr>
+                <th>أيقونة</th>
+                <th>اسم الخدمة</th>
+                <th>الوصف</th>
+                <th>السعر</th>
+                <th>مدة التسليم</th>
+                <th>الفئة</th>
+                <th>تاريخ الإضافة</th>
+                <th>ملاحظات</th>
+                <th>عدد الطلبات</th>
+                <th>الحالة</th>
+                <th>تعديل</th>
+                <th>تفعيل/تعطيل</th>
+                <th>حذف</th>
+            </tr>
+            {% for service in services %}
+            <tr>
+                <td>{% if service['image_url'] %}<img src="{{ service['image_url'] }}" alt="icon" style="width:36px;height:36px;border-radius:8px;">{% endif %}</td>
+                <td>{{ service['name'] }}</td>
+                <td>{{ service['description'] }}</td>
+                <td>${{ '%.2f'|format(service['price']) }}</td>
+                <td>{{ service['delivery_time'] }}</td>
+                <td>{{ service['category'] }}</td>
+                <td>{{ service['created_at'] }}</td>
+                <td>{{ service['notes'] }}</td>
+                <td>{{ orders_count[service['id']] }}</td>
+                <td>{% if service['is_active'] %}<span style="color:#27ae60;font-weight:600;">مفعلة</span>{% else %}<span style="color:#e74c3c;font-weight:600;">معطلة</span>{% endif %}</td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="edit_service" value="{{ service['id'] }}">
+                        <input type="number" name="new_price" min="0" step="0.01" required style="width:60px;padding:3px 8px;border-radius:4px;" placeholder="سعر جديد">
+                        <input type="text" name="new_delivery_time" value="{{ service['delivery_time'] }}" style="width:70px;padding:3px 8px;border-radius:4px;" placeholder="مدة التسليم">
+                        <input type="text" name="new_description" value="{{ service['description'] }}" style="width:90px;padding:3px 8px;border-radius:4px;" placeholder="وصف">
+                        <input type="text" name="new_notes" value="{{ service['notes'] }}" style="width:90px;padding:3px 8px;border-radius:4px;" placeholder="ملاحظات">
+                        <input type="text" name="new_image_url" value="{{ service['image_url'] }}" style="width:90px;padding:3px 8px;border-radius:4px;" placeholder="رابط صورة">
+                        <button type="submit" style="padding:3px 10px;border-radius:4px;background:#219150;color:#fff;border:none;">تحديث</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="toggle_service" value="{{ service['id'] }}">
+                        <button type="submit" style="padding:3px 10px;border-radius:4px;background:#007bff;color:#fff;border:none;">{% if service['is_active'] %}تعطيل{% else %}تفعيل{% endif %}</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="delete_service" value="{{ service['id'] }}">
+                        <button type="submit" class="action-btn" onclick="return confirm('هل أنت متأكد من حذف الخدمة؟');">حذف</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="/admin/orders" class="back-link">العودة للطلبات</a>
+    </div>
+</body>
+</html>

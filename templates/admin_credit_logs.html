@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سجل الكريدي - الإدارة</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .logs-table {width:100%;margin-top:30px;border-collapse:collapse;direction:rtl;}
+        .logs-table th, .logs-table td {border:1.5px solid #e3eafc;padding:8px 10px;text-align:right;}
+        .logs-table th {background:#eaf4ff;color:#007bff;font-weight:700;}
+        .logs-table tr:nth-child(even) {background:#fafdff;}
+        .logs-table tr:nth-child(odd) {background:#fff;}
+        .logs-title {margin-bottom:18px;color:#007bff;font-size:1.3em;font-weight:700;}
+        .back-link {display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;}
+        .navbar {background-color: #007bff; padding: 10px 0; direction: ltr;}
+        .nav-container {max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;}
+        .nav-logo {color: #fff; font-size: 1.5em; font-weight: 700; text-decoration: none;}
+        .nav-links {list-style: none; padding: 0; margin: 0; display: flex;}
+        .nav-links li {margin-left: 20px;}
+        .nav-links a {color: #fff; text-decoration: none; font-weight: 500;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div style="text-align:left;margin-bottom:12px;">
+            <form method="get" style="display:inline;">
+                <select name="lang" onchange="this.form.submit()">
+                    {% for l in LANGUAGES %}
+                        <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div class="logs-title">{{ _t('admin_credit_logs') if _t('admin_credit_logs') != 'admin_credit_logs' else 'سجل الكريدي (جميع المستخدمين)' }}</div>
+        <form method="get" style="margin-bottom:18px;">
+            <label>تصفية حسب المستخدم:</label>
+            <select name="user_id" onchange="this.form.submit()">
+                <option value="">الكل</option>
+                {% for u in users %}
+                    <option value="{{ u.id }}" {% if u.id|string == selected_user_id %}selected{% endif %}>{{ u.username }}</option>
+                {% endfor %}
+            </select>
+        </form>
+        {% if logs %}
+        <table class="logs-table">
+            <tr>
+                <th>المستخدم</th>
+                <th>التاريخ</th>
+                <th>العملية</th>
+                <th>القيمة</th>
+                <th>السبب</th>
+            </tr>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.username }}</td>
+                <td>{{ log.created_at }}</td>
+                <td>{{ log.action }}</td>
+                <td>{{ log.amount }}</td>
+                <td>{{ log.reason }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+        {% else %}
+            <div style="color:#888;margin-top:30px;">لا يوجد سجل كريدي حالياً.</div>
+        {% endif %}
+        <a href="/admin/orders" class="back-link">العودة للطلبات</a>
+    </div>
+</body>
+</html>

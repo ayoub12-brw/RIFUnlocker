@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شحن الرصيد</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .pay-container {max-width:600px;margin:40px auto;background:#fafdff;padding:32px 28px;border-radius:12px;box-shadow:0 2px 12px #e3eafc;direction:rtl;}
+        .pay-container h1 {color:#007bff;margin-bottom:18px;}
+        .pay-container h2 {color:#219150;margin-top:32px;}
+        .pay-method {margin-bottom:24px;}
+        .pay-method label {font-weight:600;color:#222b45;}
+        .pay-method input, .pay-method select {padding:7px 12px;border-radius:5px;border:1.5px solid #b6d4fe;margin-top:6px;}
+        .pay-btn {background:#27ae60;color:#fff;padding:8px 24px;border:none;border-radius:6px;font-size:1em;font-weight:600;cursor:pointer;}
+        .pay-btn:hover {background:#219150;}
+        .msg-success {color:#27ae60;font-weight:600;}
+        .msg-error {color:#e74c3c;font-weight:600;}
+        .proof-upload {margin-top:12px;}
+        .navbar {background:#fff;padding:10px 0;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
+        .nav-container {max-width:1200px;margin:0 auto;padding:0 20px;display:flex;align-items:center;justify-content:space-between;}
+        .nav-logo {font-size:1.5em;font-weight:700;color:#007bff;text-decoration:none;}
+        .nav-links {list-style:none;padding:0;margin:0;display:flex;gap:15px;}
+        .nav-links li {display:inline;}
+        .nav-links a {color:#222b45;text-decoration:none;font-weight:500;}
+        .nav-links a:hover {text-decoration:underline;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="pay-container">
+        <div style="text-align:left;margin-bottom:12px;">
+            <form method="get" style="display:inline;">
+                <select name="lang" onchange="this.form.submit()">
+                    {% for l in LANGUAGES %}
+                        <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <h1>{{ _t('recharge') if _t('recharge') != 'recharge' else 'شحن الرصيد' }}</h1>
+        {% if success %}
+            <div class="msg-success">{{ success }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="msg-error">{{ error }}</div>
+        {% endif %}
+        <form method="post" enctype="multipart/form-data">
+            <div class="pay-method">
+                <label>{{ _t('choose_payment') }}</label><br>
+                <select name="method" required>
+                    <option value="">-- {{ _t('choose_payment') }} --</option>
+                    <option value="paypal">{{ _t('paypal') }}</option>
+                    <option value="stripe">{{ _t('stripe') }}</option>
+                    <option value="usdt">{{ _t('usdt') }}</option>
+                    <option value="manual">{{ _t('manual') }}</option>
+                </select>
+            </div>
+            <div class="pay-method">
+                <label>المبلغ (بالدولار أو ما يعادله):</label><br>
+                <input type="number" name="amount" min="1" required>
+            </div>
+            <div class="pay-method proof-upload">
+                <label>إثبات الدفع (صورة أو لقطة شاشة):</label><br>
+                <input type="file" name="proof" accept="image/*">
+            </div>
+            <button type="submit" class="pay-btn">إرسال طلب الشحن</button>
+        </form>
+        <div style="margin-top:30px;color:#888;font-size:0.98em;">
+            <b>ملاحظة:</b> سيتم مراجعة طلبك من الإدارة وتأكيد الرصيد بعد التحقق من الدفع.
+        </div>
+        <a href="/panel" style="display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;">العودة للوحة المستخدم</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>توثيق API - rif-unlocker</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .doc-container {max-width:700px;margin:40px auto;background:#fafdff;padding:32px 28px;border-radius:12px;box-shadow:0 2px 12px #e3eafc;direction:rtl;}
+        .doc-container h1 {color:#007bff;margin-bottom:18px;}
+        .doc-container h2 {color:#219150;margin-top:32px;}
+        .doc-container code, .doc-container pre {background:#f3f6fa;padding:4px 8px;border-radius:6px;font-family:monospace;direction:ltr;}
+        .doc-container pre {display:block;overflow-x:auto;margin:12px 0;}
+        .doc-container .endpoint {color:#007bff;font-weight:600;}
+        .doc-container .header {color:#e67e22;}
+        .doc-container .json {color:#222b45;}
+        .navbar {background-color: #007bff; padding: 10px 0;}
+        .nav-container {max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;}
+        .nav-logo {color: #fff; font-size: 24px; text-decoration: none;}
+        .nav-links {list-style: none; margin: 0; padding: 0; display: flex;}
+        .nav-links li {margin-left: 20px;}
+        .nav-links a {color: #fff; text-decoration: none; font-size: 16px;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="doc-container">
+        <div style="text-align:left;margin-bottom:12px;">
+            <form method="get" style="display:inline;">
+                <select name="lang" onchange="this.form.submit()">
+                    {% for l in LANGUAGES %}
+                        <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <h1>{{ _t('api_docs') if _t('api_docs') != 'api_docs' else 'توثيق API - rif-unlocker' }}</h1>
+        <p>يمكنك استخدام API لربط تطبيقاتك أو سكربتاتك مع النظام بشكل مباشر. كل مستخدم لديه <b>API Key</b> خاص به (تجده في لوحة المستخدم).</p>
+        <h2>المصادقة (Authentication)</h2>
+        <ul>
+            <li>كل طلب يجب أن يحتوي على الهيدر: <code class="header">X-API-KEY: &lt;api_key&gt;</code></li>
+            <li>كل مفتاح له حد أقصى 5 طلبات في الدقيقة (Rate Limit).</li>
+        </ul>
+        <h2>مثال: فتح FRP</h2>
+        <div class="endpoint">POST /api/frp/unlock</div>
+        <b>Headers:</b>
+        <pre>X-API-KEY: &lt;api_key&gt;
+Content-Type: application/json</pre>
+        <b>Body (JSON):</b>
+        <pre class="json">{
+  "imei": "356123456789012",
+  "model": "Samsung A12"
+}</pre>
+        <b>Response (نجاح):</b>
+        <pre class="json">{
+  "success": true,
+  "message": "FRP unlock request received for IMEI 356123456789012, model Samsung A12",
+  "user": "username"
+}</pre>
+        <b>Response (خطأ):</b>
+        <pre class="json">{
+  "success": false,
+  "error": "API key required"
+}</pre>
+        <h2>ملاحظات</h2>
+        <ul>
+            <li>كل الردود بصيغة JSON.</li>
+            <li>إذا تجاوزت الحد المسموح ستظهر رسالة rate limit.</li>
+            <li>يمكنك استخدام أي لغة (Python, PHP, JS...)</li>
+        </ul>
+        <h2>مثال كود (Python)</h2>
+        <pre class="json">import requests
+
+url = "https://your-domain.com/api/frp/unlock"
+headers = {
+    "X-API-KEY": "ضع_مفتاحك_هنا",
+    "Content-Type": "application/json"
+}
+data = {"imei": "356123456789012", "model": "Samsung A12"}
+resp = requests.post(url, json=data, headers=headers)
+print(resp.json())
+</pre>
+    </div>
+</body>
+</html>

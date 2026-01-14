@@ -1,0 +1,37 @@
+{# قالب فرعي لعرض خدمات السيرفر مقسمة حسب المجموعة الرئيسية #}
+{% set group_map = {} %}
+{% for service in services if service['category'] == 'Server Service' %}
+    {% set group_name = service['name'].split(' ')[0] %}
+    {% if group_name not in group_map %}
+        {% set _ = group_map.update({group_name: []}) %}
+    {% endif %}
+    {% set _ = group_map[group_name].append(service) %}
+{% endfor %}
+
+{% for group, group_services in group_map.items() %}
+    <div style="margin-bottom:38px;">
+        <h2 style="color:#007bff;font-size:1.25em;font-weight:700;margin-bottom:12px;">{{ group }}</h2>
+        <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;background:#fff;box-shadow:0 2px 8px #e3eafc;margin-bottom:10px;">
+            <thead>
+                <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                    <th style="padding:10px 8px;border:1px solid #e3eafc;">اسم الخدمة</th>
+                    <th style="padding:10px 8px;border:1px solid #e3eafc;">مدة التسليم</th>
+                    <th style="padding:10px 8px;border:1px solid #e3eafc;">السعر</th>
+                    <th style="padding:10px 8px;border:1px solid #e3eafc;">طلب</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in group_services %}
+                <tr>
+                    <td style="padding:8px 6px;border:1px solid #e3eafc;">{{ s['name'] }}</td>
+                    <td style="padding:8px 6px;border:1px solid #e3eafc;">{{ s['delivery_time'] }}</td>
+                    <td style="padding:8px 6px;border:1px solid #e3eafc;">${{ s['price'] }}</td>
+                    <td style="padding:8px 6px;border:1px solid #e3eafc;"><a href="/order?service={{ s['name'] }}" class="service-btn">اطلب</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+{% endfor %}

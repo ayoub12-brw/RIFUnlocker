@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    ...existing code...
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div style="text-align:left;margin-bottom:12px;">
+            <form method="get" style="display:inline;">
+                <select name="lang" onchange="this.form.submit()">
+                    {% for l in LANGUAGES %}
+                        <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div class="recharge-title">{{ _t('recharge_requests') if _t('recharge_requests') != 'recharge_requests' else 'طلبات شحن الرصيد' }}</div>
+        {% if success %}
+            <div class="msg-success">{{ success }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="msg-error">{{ error }}</div>
+        {% endif %}
+        <table class="recharge-table" style="width:100%;margin-top:30px;border-collapse:collapse;direction:rtl;box-shadow:0 2px 10px #e3eafc;">
+            <tr style="background:#eaf4ff;color:#007bff;font-weight:700;">
+                <th style="padding:10px 8px;border:1.5px solid #e3eafc;">#</th>
+                <th style="padding:10px 8px;border:1.5px solid #e3eafc;">المستخدم</th>
+                <th style="padding:10px 8px;border:1.5px solid #e3eafc;">الطريقة</th>
+                <th style="padding:10px 8px;border:1.5px solid #e3eafc;">المبلغ</th>
+                <th style="padding:10px 8px;border:1.5px solid #e3eafc;">تاريخ الطلب</th>
+                <th style="padding:10px 8px;border:1.5px solid #e3eafc;">إثبات الدفع</th>
+                <th style="padding:10px 8px;border:1.5px solid #e3eafc;">الحالة</th>
+                <th style="padding:10px 8px;border:1.5px solid #e3eafc;">إجراءات</th>
+            </tr>
+            {% for req in requests %}
+            <tr style="background-color: {{ '#fafdff' if loop.index0 % 2 == 0 else '#fff' }};">
+                <td style="padding:8px 6px;border:1.5px solid #e3eafc;">{{ req.id }}</td>
+                <td style="padding:8px 6px;border:1.5px solid #e3eafc;">{{ req.username }}</td>
+                <td style="padding:8px 6px;border:1.5px solid #e3eafc;">{{ req.method }}</td>
+                <td style="padding:8px 6px;border:1.5px solid #e3eafc;">${{ req.amount }}</td>
+                <td style="padding:8px 6px;border:1.5px solid #e3eafc;">{{ req.created_at if req.created_at else '-' }}</td>
+                <td style="padding:8px 6px;border:1.5px solid #e3eafc;">
+                    {% if req.proof %}
+                        <a href="/static/proofs/{{ req.proof }}" target="_blank" style="color:#007bff;text-decoration:underline;">عرض الإثبات</a>
+                    {% else %}-{% endif %}
+                </td>
+                <td style="padding:8px 6px;border:1.5px solid #e3eafc;">
+                    {% if req.status == 'pending' %}<span style="color:#f39c12;font-weight:600;">قيد المراجعة</span>{% elif req.status == 'approved' %}<span style="color:#27ae60;font-weight:600;">مقبول</span>{% else %}<span style="color:#e74c3c;font-weight:600;">مرفوض</span>{% endif %}
+                </td>
+                <td style="padding:8px 6px;border:1.5px solid #e3eafc;">
+                    {% if req.status == 'pending' %}
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="approve_id" value="{{ req.id }}">
+                        <button type="submit" class="approve-btn" style="background:#27ae60;color:#fff;padding:4px 12px;border-radius:5px;border:none;">قبول</button>
+                    </form>
+                    <form method="post" style="display:inline;">
+                        <input type="hidden" name="reject_id" value="{{ req.id }}">
+                        <button type="submit" class="reject-btn" style="background:#e74c3c;color:#fff;padding:4px 12px;border-radius:5px;border:none;">رفض</button>
+                    </form>
+                    {% else %}-{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="/admin/orders" class="back-link">العودة للطلبات</a>
+    </div>
+</body>
+</html>

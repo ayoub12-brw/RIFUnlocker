@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ service['name'] }} | تفاصيل الخدمة</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .service-detail-card {
+            background: #fff;
+            border: 1.5px solid #e3eafc;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.07);
+            padding: 28px 24px 22px 24px;
+            margin: 40px auto 0 auto;
+            max-width: 500px;
+            text-align: right;
+        }
+        .service-detail-title {color:#007bff;font-size:1.35em;font-weight:700;margin-bottom:12px;}
+        .service-detail-img {max-width:180px;max-height:120px;display:block;margin-bottom:18px;}
+        .service-detail-desc {color:#222b45;font-size:1.08em;margin-bottom:14px;}
+        .service-detail-terms {background:#f7fbff;border:1px solid #e3eafc;border-radius:7px;padding:10px 14px;margin-bottom:14px;color:#0056b3;}
+        .service-detail-price {font-size:1.15em;color:#007bff;font-weight:600;margin-bottom:10px;}
+        .service-detail-delivery {font-size:1em;color:#555;margin-bottom:10px;}
+        .service-btn {margin-top:10px;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+                <li style="margin-right:18px;">
+                    <form method="get" style="display:inline;">
+                        <select name="lang" onchange="this.form.submit()" style="padding:5px 12px;border-radius:6px;border:1px solid #e3eafc;">
+                            {% for l in LANGUAGES %}
+                                <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                            {% endfor %}
+                        </select>
+                        {% for key, value in request.args.items() %}
+                            {% if key != 'lang' %}
+                                <input type="hidden" name="{{key}}" value="{{value}}">
+                            {% endif %}
+                        {% endfor %}
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="service-detail-card">
+        {% if service['image_url'] %}
+        <img src="{{ service['image_url'] }}" alt="صورة الخدمة" class="service-detail-img" />
+        {% endif %}
+        <div class="service-detail-title">{{ service['name'] }}</div>
+        <div class="service-detail-desc">{{ service['description'] }}</div>
+        <div class="service-detail-price">السعر: {{ service['price'] }} $</div>
+        <div class="service-detail-delivery">مدة التسليم: {{ service['delivery_time'] }}</div>
+        {% if service['terms'] %}
+        <div class="service-detail-terms">الشروط: {{ service['terms'] }}</div>
+        {% endif %}
+        <a href="/order?service={{ service['name'] }}" class="service-btn">اطلب الخدمة</a>
+    </div>
+</body>
+</html>

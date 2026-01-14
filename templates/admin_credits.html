@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة رصيد المستخدمين</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .users-table {width:100%;margin-top:30px;border-collapse:collapse;direction:rtl;}
+        .users-table th, .users-table td {border:1.5px solid #e3eafc;padding:8px 10px;text-align:right;}
+        .users-table th {background:#eaf4ff;color:#007bff;font-weight:700;}
+        .users-table tr:nth-child(even) {background:#fafdff;}
+        .users-table tr:nth-child(odd) {background:#fff;}
+        .users-title {margin-bottom:18px;color:#007bff;font-size:1.3em;font-weight:700;}
+        .back-link {display:inline-block;margin-top:18px;color:#007bff;text-decoration:underline;}
+        .credit-form {display:flex;gap:8px;align-items:center;}
+        .credit-form input[type=number] {width:60px;padding:3px 6px;border-radius:4px;border:1px solid #ccc;}
+        .credit-form select, .credit-form button {padding:3px 8px;border-radius:4px;}
+        .credit-form button {background:#27ae60;color:#fff;border:none;}
+        .credit-form button:hover {background:#219150;}
+        .msg-success {color:#27ae60;font-weight:600;}
+        .msg-error {color:#e74c3c;font-weight:600;}
+        .navbar {background-color: #007bff; padding: 10px 0; direction: rtl;}
+        .nav-container {max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center;}
+        .nav-logo {color: #fff; font-size: 1.5em; font-weight: 700; text-decoration: none;}
+        .nav-links {list-style: none; padding: 0; margin: 0; display: flex; gap: 15px;}
+        .nav-links li {display: inline;}
+        .nav-links a {color: #fff; text-decoration: none; padding: 5px 10px; border-radius: 4px;}
+        .nav-links a:hover {background-color: #0056b3;}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="nav-logo">RIF Unlocker</a>
+            <ul class="nav-links">
+                <li><a href="/">الرئيسية</a></li>
+                <li><a href="/services?lang={{lang}}">الخدمات</a></li>
+                <li><a href="/my_orders?lang={{lang}}">طلباتي</a></li>
+                {% if session.get('user_id') %}
+                <li><a href="/logout">تسجيل الخروج</a></li>
+                {% else %}
+                <li><a href="/login">تسجيل الدخول</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div style="text-align:left;margin-bottom:12px;">
+            <form method="get" style="display:inline;">
+                <select name="lang" onchange="this.form.submit()">
+                    {% for l in LANGUAGES %}
+                        <option value="{{l}}" {% if lang==l %}selected{% endif %}>{{ l|upper }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+        <div class="users-title">{{ _t('admin_credits') if _t('admin_credits') != 'admin_credits' else 'إدارة رصيد المستخدمين' }}</div>
+        {% if success %}
+            <div class="msg-success">{{ success }}</div>
+        {% endif %}
+        {% if error %}
+            <div class="msg-error">{{ error }}</div>
+        {% endif %}
+        <table class="users-table">
+            <tr>
+                <th>اسم المستخدم</th>
+                <th>البريد الإلكتروني</th>
+                <th>الرصيد الحالي</th>
+                <th>تعديل الرصيد</th>
+            </tr>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.credits }}</td>
+                <td>
+                    <form method="post" class="credit-form">
+                        <input type="hidden" name="user_id" value="{{ user.id }}">
+                        <input type="number" name="amount" min="1" required placeholder="القيمة">
+                        <select name="action">
+                            <option value="add">زيادة</option>
+                            <option value="subtract">نقصان</option>
+                        </select>
+                        <input type="text" name="reason" placeholder="سبب التعديل (اختياري)" style="width:120px;">
+                        <button type="submit">تنفيذ</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+        <a href="/admin/orders" class="back-link">العودة للطلبات</a>
+    </div>
+</body>
+</html>
